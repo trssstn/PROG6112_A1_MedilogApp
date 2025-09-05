@@ -64,9 +64,17 @@ class PatientRecord {
         report.append("\nEXAMINATION DETAILS\n");
         report.append("---------------------------------------------------------------------\n");
         report.append("Date: ").append(sdf.format(examination.getExaminationDate())).append("\n");
+        
+        //Null checks for examination details to prevent NullPointerException errors
+        if (examination.getPresentingComplaint() != null) {
         report.append("Presenting Complaint: ").append(examination.getPresentingComplaint()).append("\n");
+        }
+        if (examination.getPatientHistory() != null) {
         report.append("Patient History: ").append(examination.getPatientHistory()).append("\n");
+        }
+        if (examination.getSignsAndSymptoms() != null) {
         report.append("Signs and Symptoms: ").append(examination.getSignsAndSymptoms()).append("\n");
+        }
         
         report.append("\nPhysical Examination:\n");
         for (String exam : examination.getPhysicalExamination()) {
@@ -82,13 +90,20 @@ class PatientRecord {
             }
         }
         
+        if (examination.getFinalDiagnosis() != null) {
         report.append("Final Diagnosis: ").append(examination.getFinalDiagnosis()).append("\n");
+        }
         
         //Treatment Plan
         report.append("\nTREATMENT PLAN\n");
         report.append("---------------------------------------------------------------------\n");
+        
+        if (treatmentPlan.getDepartment() != null) {
         report.append("Department: ").append(treatmentPlan.getDepartment()).append("\n");
+        }
+        if (treatmentPlan.getTriageLevel() != null) {
         report.append("Triage Level: ").append(treatmentPlan.getTriageLevel()).append("\n");
+        }
         
         report.append("\nMedications Prescribed:\n");
         for (String med : treatmentPlan.getMedications()) {
