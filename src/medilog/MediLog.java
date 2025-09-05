@@ -269,5 +269,141 @@ public class MediLog {
         System.out.println("Update log added successfully!");
     }
     
+    private static void manageTreatmentPlan() {
+        System.out.println("\n---------------Manage Treatment Plan----------------");
+        
+        System.out.println("Enter patient ID number: ");
+        String idNumber = scanner.nextLine();
+        
+        PatientRecord record = findPatientByID(idNumber);
+        if (record == null) {
+            System.out.println("Patient not found!");
+            return;
+        }
+        
+        TreatmentPlan plan = record.getTreatmentPlan();
+        
+        System.out.println("Enter department: ");
+        plan.setDepartment(scanner.nextLine());
+        
+        System.out.println("Enter triage level (1-5): ");
+        plan.setTriageLevel(scanner.nextLine());
+        
+        //Add medications
+        System.out.println("Number of new medications to prescribe: ");
+        int medCount = scanner.nextInt();
+        scanner.nextLine();
+        
+        for (int i = 0; i < medCount; i++) {
+            System.out.println("Medication " + (i + 1) + ": ");
+            plan.addMedication(scanner.nextLine());
+        }
+        
+        //Add procedures
+        System.out.println("Number of procedures to schedule: ");
+        int procCount = scanner.nextInt();
+        scanner.nextLine();
+        
+        for (int i = 0; i < procCount; i++) {
+            System.out.println("Procedure " + (i+1) + ": ");
+            plan.addProcedure(scanner.nextLine());
+        }
+        
+        //Add referrals
+        System.out.println("Number of referrals: ");
+        int refCount = scanner.nextInt();
+        scanner.nextLine();
+        
+        for (int i = 0; i < refCount; i++) {
+            System.out.println("Referral " + (i + 1) + ": ");
+            plan.addReferral(scanner.nextLine());
+        }
+        
+        System.out.println("\nTreatment plan updated successfully!");
+    }
     
+    private static void updateAdmissionStatus() {
+        System.out.println("\n---------------Update Admission Status----------------");
+        
+        System.out.println("Enter patient ID number: ");
+        String idNumber = scanner.nextLine();
+        
+        PatientRecord record = findPatientByID(idNumber);
+        if (record == null) {
+            System.out.println("Patient not found!");
+            return;
+        }
+        
+        AdmissionStatus status = record.getAdmissionStatus();
+        
+        System.out.println("1. Admit Patient");
+        System.out.println("2. Discharge Patient");
+        System.out.println("Choose option: ");
+        
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+        
+        if (choice == 1) {
+            System.out.println("Enter ward: ");
+            String ward = scanner.nextLine();
+            
+            System.out.println("Enter department: ");
+            String dept = scanner.nextLine();
+            
+            System.out.println("Enter bed number: ");
+            String bedNum = scanner.nextLine();
+            
+            status.admitPatient(ward, dept, bedNum);
+            System.out.println("Patient admitted successfully!");
+        } else if (choice == 2) {
+            System.out.println("Enter discharge status (Recovered/Transferred/Other): ");
+            String dischargeStatus = scanner.nextLine();
+            
+            status.dischargePatient(dischargeStatus);
+            System.out.println("Patient discharged successfully!");
+        }
+    }
+    
+    private static void viewPatientReport() {
+        System.out.println("\n---------------View Patient Report----------------");
+        
+        System.out.println("Enter patient ID number: ");
+        String idNumber = scanner.nextLine();
+        
+        PatientRecord record = findPatientByID(idNumber);
+        if (record == null) {
+            System.out.println("Patient not found!");
+            return;
+        }
+        
+        System.out.println(record.generateReport());
+    }
+    
+    private static void listAllPatients() {
+        System.out.println("\n---------------All Registered Patients----------------");
+        
+        if (recordCount == 0) {
+            System.out.println("No patients registered yet.");
+            return;
+        }
+        
+        System.out.println("\nTotal patients: " + recordCount);
+        System.out.println("--------------------------------------------------------");
+        
+        //Loop through all patient records
+        for (int i = 0; i < recordCount; i++) {
+            Patient p = patientRecords[i].getPatient();
+            AdmissionStatus status = patientRecords[i].getAdmissionStatus();
+            
+            System.out.println((i + 1) + ". " + p.getFullName());
+            System.out.println("    ID: " + p.getIdNumber());
+            System.out.println("    Age: " + p.getAge());
+            System.out.println("    Status: " + (status.isAdmitted() ?  "ADMITTED" : "NOT ADMITTED"));
+            if (status.isAdmitted()) {
+                System.out.println("    Ward: " + status.getWard() + ",  Bed: " + status.getBedNumber());
+                System.out.println("    Department: " + status.getDepartment());
+            }
+            System.out.println("--------------------------------------------------------");
+        }       
+    }
 }
