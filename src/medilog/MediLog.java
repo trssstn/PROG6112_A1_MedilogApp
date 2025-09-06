@@ -5,12 +5,11 @@ import java.util.Scanner;
 public class MediLog {
     private static PatientRecord[] patientRecords;
     private static int recordCount;
-    private static Scanner scanner;
     
+    //Static initializer with error handling
     static {
         patientRecords = new PatientRecord[5000]; //Max 5000 patient records
         recordCount = 0;
-        scanner = new Scanner(System.in);
     }
     
     public static void main(String[] args) {
@@ -18,11 +17,15 @@ public class MediLog {
         System.out.println("Welcome to the MediLog Healthcare Management Application");
         System.out.println("=============================================================================================\n");
         
+        boolean exitProgram = false;
+        
         //Main menu loop
-        while (true) {
+        while (!exitProgram) {
+          try{
             displayMainMenu();
-            int choice = scanner.nextInt();
-            scanner.nextLine(); //Clears buffer
+            
+            //Validated integer input for menu choice
+            int choice = InputValidator.getValidInteger("Enter your choice: ", 1, 8);
             
             switch (choice) {
                 case 1:
@@ -47,15 +50,20 @@ public class MediLog {
                     listAllPatients();
                     break;
                 case 8:
-                    System.out.println("Thank you for using MediLog!");
-                    System.out.println("Shutting down...");
-                    System.exit(0);
+                    //Get user confirmation before exit
+                    if (InputValidator.getYesNoConfirmation("Are you sure you want to exit?")) {
+                        System.out.println("Thank you for using MediLog. Shutting down...");
+                        exitProgram = true;
+                    }
                     break;
-                default:
-                    System.out.println("Invalid choice, please try again.");
             }
+        } catch (Exception e) {
+            //Global exception handler for unexpected errors (Code taken from stackoverflow)
+            System.out.println("\nAn unexpected error occurred: " + e.getMessage());
+            System.out.println("Please try again or contact system administrator if problem persists.\n");
         }
     }
+ }       
     
     private static void displayMainMenu() {
         System.out.println("\n======================MAIN MENU======================");
@@ -73,36 +81,30 @@ public class MediLog {
     private static void registerNewPatient() {
         System.out.println("\n----------------Register New Patient-----------------");
         
-        System.out.print("Enter patient name: ");
-        String name = scanner.nextLine();
+        try {
+        //Using validated input methods for all fields
+        String name = InputValidator.getValidString("Enter patient name: ");
+        String surname = InputValidator.getValidString("Enter patient surname: ");
+        String idNumber = InputValidator.getValidIDNumber("Enter patient ID number: ");
         
-        System.out.print("Enter patient surname: ");
-        String surname = scanner.nextLine();
+        //Checking for duplicate patient ID
+        if (findPatientByID(idNumber) != null) {
+            System.out.println("A patient with this ID number already exists!");
+            return;
+        }
         
-        System.out.print("Enter patient ID number: ");
-        String idNumber = scanner.nextLine();
-        
-        System.out.print("Enter patient age: ");
-        int age = scanner.nextInt();
-        scanner.nextLine();
-        
-        System.out.print("Enter date of birth (DD/MM/YYYY): ");
-        String dob = scanner.nextLine();
-        
-        System.out.print("Enter patient address: ");
-        String address = scanner.nextLine();
+        int age = InputValidator.getValidInteger("Enter patient age: ", 0, 150);
+        String dob = InputValidator.getValidDate("Enter date of birth (DD/MM/YYYY): ");
+        String address = InputValidator.getValidString("Enter patient address: ");
         
         //Create new patient
         Patient newPatient = new Patient(name, surname, idNumber, age, dob, address);
         
         //Add current medications
-        System.out.print("Amount of current medications: ");
-        int medCount = scanner.nextInt();
-        scanner.nextLine();
+        int medCount = InputValidator.getValidInteger("How many current medications? (0-25): ", 0, 20);
         
         for (int i = 0; i < medCount; i++) {
-            System.out.print("Enter medication #" + (i + 1) + " : ");
-            String med = scanner.nextLine();
+            String med = InputValidator.getValidString("Enter medication " + (i + 1) + ": ");
             newPatient.addMedication(med);
         }
         
@@ -112,6 +114,10 @@ public class MediLog {
         
         System.out.println("\nPatient registered successfully!");
         System.out.println("Patient ID: " + idNumber);
+        
+        } catch (Exception e) {
+            System.out.println("Error during patient registration: " + e.getMessage());
+        }
     }
     
     private static PatientRecord findPatientByID(String idNumber) {
@@ -126,8 +132,8 @@ public class MediLog {
     private static void addExaminationDetails() {
         System.out.println("\n--------------Add Examination Details---------------");
         
-        System.out.print("Enter patient ID number: ");
-        String idNumber = scanner.nextLine();
+        //Validate patient exists before proceeding
+        String idNumber = InputValidator.getValidIDNumber("Enter patient ID number: ");
         
         PatientRecord record = findPatientByID(idNumber);
         if (record == null) {
@@ -135,50 +141,46 @@ public class MediLog {
             return;
         }
         
+        try {
         ExaminationDetails exam = record.getExamination();
         
-        System.out.print("Enter presenting complaint: ");
-        exam.setPresentingComplaint(scanner.nextLine());
-        
-        System.out.print("Enter patient history: ");
-        exam.setPatientHistory(scanner.nextLine());
-        
-        System.out.print("Enter signs and symptoms: ");
-        exam.setSignsAndSymptoms(scanner.nextLine());
+        //Only use validated string inputs
+        exam.setPresentingComplaint(InputValidator.getValidString("Enter presenting complaint: "));
+        exam.setPatientHistory(InputValidator.getValidString("Enter patient history: "));
+        exam.setSignsAndSymptoms(InputValidator.getValidString("Enter signs and symptoms: "));
         
         //Physical examination
-        System.out.println("\nPhysical Examination (Enter details for each system):");
+        System.out.println("\nPhysical Examination (Enter details for each system, press Enter to skip):");
         String[] systems = {"Cardiovascular", "Respiratory", "Gastrointestinal", "Neurological", "Musculoskeletal", "Integumentary(skin)", "Endocrine", "Lymphatic", "Urinary", "Reproductive", "Immunological", "Miscellanaeous"};
         
         for (int i = 0; i < systems.length; i++) {
-            System.out.print(systems[i] + " findings: ");
-            String findings = scanner.nextLine();
+            String findings = InputValidator.getOptionalString(systems[i] + " findings: ");
             if (!findings.isEmpty()) {
                 exam.addPhysicalExamination(systems[i], findings, i);
             }
         }
         
         //Differential diagnoses
-        System.out.print("\nNumber of differential diagnoses: ");
-        int diffCount = scanner.nextInt();
-        scanner.nextLine();
+        int diffCount = InputValidator.getValidInteger("\nNumber of differential diagnoses (0-10): ", 0, 5);
         
-        for (int i = 0; i < diffCount && i < 5; i++) {
-            System.out.print("Differential diagnosis " + (i + 1) + ": ");
-            exam.addDifferentialDiagnosis(scanner.nextLine(), i);
+        for (int i = 0; i < diffCount; i++) {
+            String diagnosis = InputValidator.getValidString("Differential diagnosis " + (i + 1) + ": ");
+            exam.addDifferentialDiagnosis(diagnosis, i);
         }
         
-        System.out.print("Final diagnosis: ");
-        exam.setFinalDiagnosis(scanner.nextLine());
+        exam.setFinalDiagnosis(InputValidator.getValidString("Final diagnosis: "));
         
         System.out.println("\nExamination details added successfully!");  
-    }
+    } catch (Exception e) {
+        System.out.println("Error adding examination details: " + e.getMessage());
+        }
+    }      
     
     private static void addUpdateLog() {
         System.out.println("\n---------------Add Update Log----------------");
         
-        System.out.print("Enter patient ID number: ");
-        String idNumber = scanner.nextLine();
+        //Validate patient exists
+        String idNumber = InputValidator.getValidIDNumber("Enter patient ID number: ");
         
         PatientRecord record = findPatientByID(idNumber);
         if (record == null) {
@@ -186,8 +188,8 @@ public class MediLog {
             return;
         }
         
-        System.out.print("Enter staff name responsible: ");
-        String staff = scanner.nextLine();
+        try {
+        String staff = InputValidator.getValidString("Enter staff name responsible: ");
         
         System.out.println("Select procedure type:");
         System.out.println("1. Amniotic Fluid Fern Test");
@@ -221,8 +223,8 @@ public class MediLog {
         System.out.println("29. Venous Access: Intraosseus (IO) Infusion");
         System.out.println("30. Other/Miscellaneous");
         
-        int procChoice = scanner.nextInt();
-        scanner.nextLine();
+        //Validate user menu choice
+        int procChoice = InputValidator.getValidInteger("Enter choice: ", 1, 30);
         
         String procedureType = "";
         
@@ -260,13 +262,15 @@ public class MediLog {
             default: procedureType = "Other/Miscellaneous"; break;
            }
         
-        System.out.println("Enter details: ");
-        String details = scanner.nextLine();
+        String details = InputValidator.getValidString("Enter details: ");
         
         UpdateLog log = new UpdateLog(staff, procedureType, details);
         record.addUpdateLog(log);
         
         System.out.println("Update log added successfully!");
+    } catch (Exception e) {
+        System.out.println("Error adding update log: " + e.getMessage());
+        }
     }
     
     private static void manageTreatmentPlan() {
