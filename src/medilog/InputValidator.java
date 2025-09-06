@@ -123,9 +123,37 @@ class InputValidator {
                 System.out.println("ID number cannot be empty.");
             } else if (!id.matches("\\d+")) {
                 System.out.println("ID number must contain only digits.");
-            } else if (!id.length() == 13) {
-                
+            } else if (id.length() != 13) {
+                System.out.println("ID number must be 13 digits!");
+            } else {
+                isValid = true;
             }
         }
+        return id;
+    }
+    
+    /**
+     * Gets yes/no confirmation from user
+     * @param prompt The message to display to user
+     * @return true for yes, false for no
+     */
+    
+    public static boolean getYesNoConfirmation(String prompt) {
+        String response = "";
+        boolean isValid = false;
+        
+        while (!isValid) {
+            System.out.println(prompt + " (Y/N): ");
+            response = scanner.nextLine().trim().toUpperCase();
+            
+            if (response.equals("Y") || response.equals("YES")) {
+                return true;
+            } else if (response.equals("N") || response.equals("NO")) {
+                return false;
+            } else {
+                System.out.println("Please enter Y for Yes or N for No.");
+            }
+        }
+        return false;
     }
 }
