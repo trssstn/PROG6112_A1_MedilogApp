@@ -276,8 +276,8 @@ public class MediLog {
     private static void manageTreatmentPlan() {
         System.out.println("\n---------------Manage Treatment Plan----------------");
         
-        System.out.println("Enter patient ID number: ");
-        String idNumber = scanner.nextLine();
+        //Validate patient exists
+        String idNumber = InputValidator.getValidIDNumber("Enter patient ID number: ");
         
         PatientRecord record = findPatientByID(idNumber);
         if (record == null) {
@@ -285,52 +285,50 @@ public class MediLog {
             return;
         }
         
+        try {
         TreatmentPlan plan = record.getTreatmentPlan();
         
-        System.out.println("Enter department: ");
-        plan.setDepartment(scanner.nextLine());
+        plan.setDepartment(InputValidator.getValidString("Enter department: "));
         
-        System.out.println("Enter triage level (1-5): ");
-        plan.setTriageLevel(scanner.nextLine());
+        int triageLevel = InputValidator.getValidInteger("Enter triage level (1-5): ", 1, 5);
+        plan.setTriageLevel(String.valueOf(triageLevel));
         
         //Add medications
-        System.out.println("Number of new medications to prescribe: ");
-        int medCount = scanner.nextInt();
-        scanner.nextLine();
+        int medCount = InputValidator.getValidInteger("Number of new medications to prescribe (0-20): ", 0, 20);
         
         for (int i = 0; i < medCount; i++) {
-            System.out.println("Medication " + (i + 1) + ": ");
-            plan.addMedication(scanner.nextLine());
+            String medication = InputValidator.getValidString("Medication " + (i + 1) + ": ");
+            plan.addMedication(medication);
         }
         
         //Add procedures
-        System.out.println("Number of procedures to schedule: ");
-        int procCount = scanner.nextInt();
-        scanner.nextLine();
+        int procCount = InputValidator.getValidInteger("Number of procedures to schedule (0-10): ", 0, 10);
         
         for (int i = 0; i < procCount; i++) {
-            System.out.println("Procedure " + (i+1) + ": ");
-            plan.addProcedure(scanner.nextLine());
+            String procedure = InputValidator.getValidString("Procedure " + (i + 1) + ": ");
+            plan.addProcedure(procedure);
         }
         
         //Add referrals
-        System.out.println("Number of referrals: ");
-        int refCount = scanner.nextInt();
-        scanner.nextLine();
+        int refCount = InputValidator.getValidInteger("Number of referrals (0-5): ", 0, 5);
         
         for (int i = 0; i < refCount; i++) {
-            System.out.println("Referral " + (i + 1) + ": ");
-            plan.addReferral(scanner.nextLine());
+            String referral = InputValidator.getValidString("Referral " + (i + 1) + ": ");
+            plan.addReferral(referral);
         }
         
         System.out.println("\nTreatment plan updated successfully!");
-    }
+        
+    } catch (Exception e) {
+        System.out.println("Error managing treatment plan: " + e.getMessage());
+        }
+    }    
     
     private static void updateAdmissionStatus() {
         System.out.println("\n---------------Update Admission Status----------------");
         
-        System.out.println("Enter patient ID number: ");
-        String idNumber = scanner.nextLine();
+        //Validate patient exists
+        String idNumber = InputValidator.getValidIDNumber("Enter patient ID number: ");
         
         PatientRecord record = findPatientByID(idNumber);
         if (record == null) {
@@ -338,45 +336,79 @@ public class MediLog {
             return;
         }
         
+        try {
         AdmissionStatus status = record.getAdmissionStatus();
         
         System.out.println("1. Admit Patient");
         System.out.println("2. Discharge Patient");
-        System.out.println("Choose option: ");
         
-        int choice = scanner.nextInt();
-        scanner.nextLine();
+        int choice = InputValidator.getValidInteger("Choose option: ", 1, 2);
         
         if (choice == 1) {
-            System.out.println("Enter ward: ");
-            String ward = scanner.nextLine();
+            //Check if patient is already admitted
+            if (status.isAdmitted()) {
+                System.out.println("Notice: Patient is already admitted.");
+                if (!InputValidator.getYesNoConfirmation("Do you want to update the admission details?")) {
+                    return;
+                }
+            }
             
-            System.out.println("Enter department: ");
-            String dept = scanner.nextLine();
-            
-            System.out.println("Enter bed number: ");
-            String bedNum = scanner.nextLine();
+            String ward = InputValidator.getValidString("Enter ward: ");
+            String dept = InputValidator.getValidString("Enter department: ");
+            String bedNum = InputValidator.getValidString("Enter bed number: ");
             
             status.admitPatient(ward, dept, bedNum);
             System.out.println("Patient admitted successfully!");
+            
         } else if (choice == 2) {
-            System.out.println("Enter discharge status (Recovered/Transferred/Other): ");
-            String dischargeStatus = scanner.nextLine();
+            //Check if patient is actually admitted before discharge
+            if (!status.isAdmitted()) {
+                System.out.println("Error: Patient is not currently admitted.");
+                return;
+            }
+            
+            System.out.println("Select discharge status: ");
+            System.out.println("1. Recovered");
+            System.out.println("2. Transferred");
+            System.out.println("3. Deceased");
+            System.out.println("4. Against Medical Advice");
+            System.out.println("5. Other");
+            
+            int statusChoice = InputValidator.getValidInteger("Enter choice: ", 1, 5);
+            String dischargeStatus = "";
+            
+            switch (statusChoice) {
+                case 1 : dischargeStatus = "Recovered"; break;
+                case 2: dischargeStatus = "Transferred"; break;
+                case 3: dischargeStatus = "Deceased"; break;
+                case 4: dischargeStatus = "Against Medical Advice"; break;
+                case 5:
+                    dischargeStatus = InputValidator.getValidString("Specify  discharge reason: ");
+                    break;
+            }
             
             status.dischargePatient(dischargeStatus);
             System.out.println("Patient discharged successfully!");
         }
-    }
+    } catch (Exception e) {
+        System.out.println("Error updating admission status: " + e.getMessage());
+        }
+    }    
     
     private static void viewPatientReport() {
         System.out.println("\n---------------View Patient Report----------------");
         
-        System.out.println("Enter patient ID number: ");
-        String idNumber = scanner.nextLine();
+        //Validate patient ID
+        String idNumber = InputValidator.getValidIDNumber("Enter patient ID number: ");
         
         PatientRecord record = findPatientByID(idNumber);
         if (record == null) {
             System.out.println("Patient not found!");
+            
+            //Offer to show user a list of patients
+            if (InputValidator.getYesNoConfirmation("Would you like to see the list of registered patients? (Y/N)")) {
+                listAllPatients();
+            }
             return;
         }
         
@@ -395,6 +427,8 @@ public class MediLog {
         System.out.println("--------------------------------------------------------");
         
         //Loop through all patient records
+        
+        try {
         for (int i = 0; i < recordCount; i++) {
             Patient p = patientRecords[i].getPatient();
             AdmissionStatus status = patientRecords[i].getAdmissionStatus();
@@ -409,5 +443,8 @@ public class MediLog {
             }
             System.out.println("--------------------------------------------------------");
         }       
+    } catch (Exception e) {
+        System.out.println("Error displaying patient list: " + e.getMessage());
     }
+  }
 }
