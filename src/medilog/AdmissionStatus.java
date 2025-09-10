@@ -2,7 +2,7 @@ package medilog;
 
 import java.util.Date;
 
-class AdmissionStatus {
+public class AdmissionStatus {
     private boolean isAdmitted;
     private String ward;
     private String department;

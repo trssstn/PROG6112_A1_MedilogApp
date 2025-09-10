@@ -2,7 +2,7 @@ package medilog;
 
 import java.util.Date;
 
-class ExaminationDetails {
+public class ExaminationDetails {
     private String patientHistory;
     private String presentingComplaint;
     private String signsAndSymptoms;

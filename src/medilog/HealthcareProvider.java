@@ -1,7 +1,7 @@
 package medilog;
 
 //Healthcare Provider class extending the Person class
-class HealthcareProvider extends Person {
+public class HealthcareProvider extends Person {
     private String profession; //ie Doctor, Nurse, Physio, etc.
     private String department; //ie Dermatology, Neurology, Gynaecology, etc.
     

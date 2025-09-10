@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.Scanner;
 
 //InputValidator class for centralised input validation
-class InputValidator {
+public class InputValidator {
     private static Scanner scanner = new Scanner(System.in);
     
     /**

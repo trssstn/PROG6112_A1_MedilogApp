@@ -4,7 +4,7 @@ package medilog;
 
 import java.util.Arrays;
 
-class Patient extends Person {
+public class Patient extends Person {
     private int age;
     private String dateOfBirth;
     private String address;

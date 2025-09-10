@@ -1,7 +1,7 @@
 package medilog;
 
 //Base person class that allows for inheritance
-abstract class Person {
+public abstract class Person {
     private String name;
     private String surname;
     private String idNumber;

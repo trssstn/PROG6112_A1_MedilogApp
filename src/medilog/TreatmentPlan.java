@@ -2,7 +2,7 @@ package medilog;
 
 import java.util.Arrays;
 
-class TreatmentPlan {
+public class TreatmentPlan {
     private String[] medications;
     private String[] procedures;
     private String[] referrals;

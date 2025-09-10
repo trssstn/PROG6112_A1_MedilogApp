@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 
-class PatientRecord {
+public class PatientRecord {
     private Patient patient;
     private ExaminationDetails examination;
     private UpdateLog[] updateLogs;

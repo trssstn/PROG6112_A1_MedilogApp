@@ -3,7 +3,7 @@ package medilog;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-class UpdateLog {
+public class UpdateLog {
     private Date timestamp;
     private String responsibleStaff;
     private String procedureType;
