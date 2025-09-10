@@ -1,8 +1,5 @@
 package medilog;
 
-import java.util.*;
-import java.text.*;
-
 //Base person class that allows for inheritance
 abstract class Person {
     private String name;
