@@ -1,7 +1,5 @@
 package medilog;
 
-import java.util.Scanner;
-
 public class MediLog {
     private static PatientRecord[] patientRecords;
     private static int recordCount;
